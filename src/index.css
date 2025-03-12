@@ -1,0 +1,19 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* 隐藏所有元素的滚动条 */
+::-webkit-scrollbar {
+  width: 0 !important;
+  /* 垂直滚动条宽度 */
+  height: 0 !important;
+  /* 水平滚动条高度 */
+  display: none;
+  /* 彻底隐藏 */
+}
+
+/* 可选：禁用滚动条交互（触摸设备可能不生效） */
+::-webkit-scrollbar-thumb {
+  background: transparent !important;
+}
