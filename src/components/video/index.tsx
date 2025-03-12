@@ -1,10 +1,5 @@
 import { AVCanvas } from '@webav/av-canvas'
-import {
-  ImgClip,
-  MP4Clip,
-  VisibleSprite,
-  renderTxt2ImgBitmap,
-} from '@webav/av-cliper'
+import { ImgClip, MP4Clip, VisibleSprite } from '@webav/av-cliper'
 import {
   Timeline,
   TimelineAction,
@@ -12,7 +7,19 @@ import {
   TimelineState,
 } from '@xzdarcy/react-timeline-editor'
 import { useEffect, useRef, useState } from 'react'
+import {
+  ZoomOutOutlined,
+  ZoomInOutlined,
+  DeleteOutlined,
+  SplitCellsOutlined,
+  PlayCircleOutlined,
+  PauseCircleOutlined,
+  ExportOutlined,
+  UploadOutlined,
+} from '@ant-design/icons'
 import VideoSrc from '../../assets/bunny.mp4'
+import { Button, Tooltip } from 'antd'
+import eventBus, { EVENTS } from '../../helper/event'
 
 export async function createFileWriter(
   extName = 'mp4'
@@ -25,7 +32,7 @@ export async function createFileWriter(
 
 type TLActionWithName = TimelineAction & { name: string }
 
-const uhaParam = new URLSearchParams(location.search).get('UHA')
+const uhaParam = new URLSearchParams(location.search).get('UHA') as string
 const __unsafe_hardwareAcceleration__ = [
   'no-preference',
   'prefer-hardware',
@@ -62,40 +69,42 @@ const TimelineEditor = ({
   return (
     <div className="">
       <div>
-        <span className="ml-[10px]">缩放：</span>
-        <button
-          onClick={() => setScale(scale + 1)}
-          className="border rounded-full"
-        >
-          -
-        </button>
-        <button
-          onClick={() => setScale(scale - 1 > 1 ? scale - 1 : 1)}
-          className="border rounded-full"
-        >
-          +
-        </button>
-        <span className="mx-[10px]">|</span>
-        <button
-          disabled={activeAction == null}
-          className="mx-[10px]"
-          onClick={() => {
-            if (activeAction == null) return
-            onDeleteAction(activeAction)
-          }}
-        >
-          删除
-        </button>
-        <button
-          disabled={activeAction == null}
-          className="mx-[10px]"
-          onClick={() => {
-            if (activeAction == null) return
-            onSplitAction(activeAction)
-          }}
-        >
-          分割
-        </button>
+        <Tooltip title="缩放">
+          <Button
+            shape="circle"
+            icon={<ZoomOutOutlined />}
+            onClick={() => setScale(scale + 1)}
+          />
+        </Tooltip>
+        <Tooltip title="缩放">
+          <Button
+            shape="circle"
+            icon={<ZoomInOutlined />}
+            onClick={() => setScale(scale - 1 > 1 ? scale - 1 : 1)}
+          />
+        </Tooltip>
+        <Tooltip title="删除">
+          <Button
+            shape="circle"
+            icon={<DeleteOutlined />}
+            disabled={activeAction == null}
+            onClick={() => {
+              if (activeAction == null) return
+              onDeleteAction(activeAction)
+            }}
+          />
+        </Tooltip>
+        <Tooltip title="分割">
+          <Button
+            shape="circle"
+            icon={<SplitCellsOutlined />}
+            disabled={activeAction == null}
+            onClick={() => {
+              if (activeAction == null) return
+              onSplitAction(activeAction)
+            }}
+          />
+        </Tooltip>
       </div>
       <Timeline
         ref={(v) => {
@@ -153,7 +162,6 @@ export default function App() {
   const tlState = useRef<TimelineState>()
 
   const [playing, setPlaying] = useState(false)
-  const [clipSource, setClipSource] = useState('remote')
 
   const [cvsWrapEl, setCvsWrapEl] = useState<HTMLDivElement | null>(null)
   const [tlData, setTLData] = useState<TimelineRow[]>([
@@ -163,6 +171,7 @@ export default function App() {
     { id: '4-text', actions: [] },
   ])
 
+  // 初始化编辑器
   useEffect(() => {
     if (cvsWrapEl == null) return
     avCvs?.destroy()
@@ -194,6 +203,28 @@ export default function App() {
     }
   }, [cvsWrapEl])
 
+  // 注册相关事件
+  useEffect(() => {
+    if (!avCvs) {
+      return
+    }
+    const addFakeVideo = async () => {
+      const stream = (await fetch(VideoSrc)).body!
+      const spr = new VisibleSprite(
+        new MP4Clip(stream, {
+          __unsafe_hardwareAcceleration__,
+        })
+      )
+      await avCvs?.addSprite(spr)
+      addSprite2Track('1-video', spr, '视频')
+    }
+    eventBus.on(EVENTS.ADD_FAKE_VIDEO, addFakeVideo)
+    return () => {
+      eventBus.off(EVENTS.ADD_FAKE_VIDEO, addFakeVideo)
+    }
+  }, [avCvs])
+
+  // 添加新的轨道
   function addSprite2Track(trackId: string, spr: VisibleSprite, name = '') {
     const track = tlData.find(({ id }) => id === trackId)
     if (track == null) return null
@@ -232,65 +263,27 @@ export default function App() {
   return (
     <div className="canvas-wrap">
       <div ref={(el) => setCvsWrapEl(el)}></div>
-      <input
-        type="radio"
-        id="clip-source-remote"
-        name="clip-source"
-        defaultChecked={clipSource === 'remote'}
-        onChange={() => {
-          setClipSource('remote')
-        }}
-      />
-      <label htmlFor="clip-source-remote"> 示例素材</label>
-      <input
-        type="radio"
-        id="clip-source-local"
-        name="clip-source"
-        defaultChecked={clipSource === 'local'}
-        onChange={() => {
-          setClipSource('local')
-        }}
-      />
-      <label htmlFor="clip-source-local"> 本地素材</label>
-      <span className="mx-[10px]">|</span>
-      <button
-        className="mx-[10px]"
-        onClick={async () => {
-          const stream =
-            clipSource === 'local'
-              ? (await loadFile({ 'video/*': ['.mp4', '.mov'] })).stream()
-              : (await fetch(VideoSrc)).body!
-          const spr = new VisibleSprite(
-            new MP4Clip(stream, {
-              __unsafe_hardwareAcceleration__,
-            })
-          )
-          await avCvs?.addSprite(spr)
-          addSprite2Track('1-video', spr, '视频')
-        }}
-      >
-        + 视频
-      </button>
-      <button
-        className="mx-[10px]"
-        onClick={async () => {
-          const spr = new VisibleSprite(
-            new ImgClip(
-              await renderTxt2ImgBitmap(
-                '示例文字',
-                'font-size: 80px; color: red;'
-              )
+      <Tooltip title="本地导入">
+        <Button
+          shape="circle"
+          icon={<UploadOutlined />}
+          onClick={async () => {
+            const stream = (
+              await loadFile({ 'video/*': ['.mp4', '.mov'] })
+            ).stream()
+            const spr = new VisibleSprite(
+              new MP4Clip(stream, {
+                __unsafe_hardwareAcceleration__,
+              })
             )
-          )
-          await avCvs?.addSprite(spr)
-          addSprite2Track('4-text', spr, '文字')
-        }}
-      >
-        + 文字
-      </button>
-      <span className="mx-[10px]">|</span>
-      <button
-        className="mx-[10px]"
+            await avCvs?.addSprite(spr)
+            addSprite2Track('1-video', spr, '视频')
+          }}
+        />
+      </Tooltip>
+      <Button
+        shape="circle"
+        icon={playing ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
         onClick={async () => {
           if (avCvs == null || tlState.current == null) return
           if (playing) {
@@ -299,21 +292,17 @@ export default function App() {
             avCvs.play({ start: tlState.current.getTime() * 1e6 })
           }
         }}
-      >
-        {playing ? '暂停' : '播放'}
-      </button>
-      <button
-        className="mx-[10px]"
+      />
+      <Button
+        shape="circle"
+        icon={<ExportOutlined />}
         onClick={async () => {
           if (avCvs == null) return
           ;(await avCvs.createCombinator({ __unsafe_hardwareAcceleration__ }))
             .output()
             .pipeTo(await createFileWriter())
         }}
-      >
-        导出视频
-      </button>
-      <p></p>
+      />
       <TimelineEditor
         timelineData={tlData}
         timelineState={tlState}

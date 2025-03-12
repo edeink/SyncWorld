@@ -3,6 +3,10 @@ body {
   padding: 0;
 }
 
+iframe {
+  border: none;
+}
+
 /* 隐藏所有元素的滚动条 */
 ::-webkit-scrollbar {
   width: 0 !important;
