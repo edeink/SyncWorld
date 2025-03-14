@@ -17,9 +17,12 @@ import {
   ExportOutlined,
   UploadOutlined,
 } from '@ant-design/icons'
-import VideoSrc from '../../assets/bunny.mp4'
+import Fake01VidoeSrc from '../../assets/01.mp4'
+import Fake02VideoSrc from '../../assets/02.mp4'
+import Fake03VideoSrc from '../../assets/03.mp4'
 import { Button, Tooltip } from 'antd'
 import eventBus, { EVENTS } from '../../helper/event'
+import styles from './index.module.less'
 
 export async function createFileWriter(
   extName = 'mp4'
@@ -71,22 +74,22 @@ const TimelineEditor = ({
       <div>
         <Tooltip title="缩放">
           <Button
-            shape="circle"
-            icon={<ZoomOutOutlined />}
+            type="text"
+            icon={<ZoomOutOutlined className={styles.videoIcon} />}
             onClick={() => setScale(scale + 1)}
           />
         </Tooltip>
         <Tooltip title="缩放">
           <Button
-            shape="circle"
-            icon={<ZoomInOutlined />}
+            type="text"
+            icon={<ZoomInOutlined className={styles.videoIcon} />}
             onClick={() => setScale(scale - 1 > 1 ? scale - 1 : 1)}
           />
         </Tooltip>
         <Tooltip title="删除">
           <Button
-            shape="circle"
-            icon={<DeleteOutlined />}
+            type="text"
+            icon={<DeleteOutlined className={styles.videoIcon} />}
             disabled={activeAction == null}
             onClick={() => {
               if (activeAction == null) return
@@ -96,8 +99,8 @@ const TimelineEditor = ({
         </Tooltip>
         <Tooltip title="分割">
           <Button
-            shape="circle"
-            icon={<SplitCellsOutlined />}
+            type="text"
+            icon={<SplitCellsOutlined className={styles.videoIcon} />}
             disabled={activeAction == null}
             onClick={() => {
               if (activeAction == null) return
@@ -157,6 +160,10 @@ const TimelineEditor = ({
 
 const actionSpriteMap = new WeakMap<TimelineAction, VisibleSprite>()
 
+let index = 0
+
+const videoAssets = [Fake01VidoeSrc, Fake02VideoSrc, Fake03VideoSrc]
+
 export default function App() {
   const [avCvs, setAVCvs] = useState<AVCanvas | null>(null)
   const tlState = useRef<TimelineState>()
@@ -171,8 +178,7 @@ export default function App() {
     { id: '4-text', actions: [] },
   ])
 
-  // 初始化编辑器
-  useEffect(() => {
+  const init = () => {
     if (cvsWrapEl == null) return
     avCvs?.destroy()
     const dom = document.querySelector('.canvas-wrap')?.parentElement
@@ -182,7 +188,7 @@ export default function App() {
     const { width, height } = dom.getBoundingClientRect()
 
     const cvs = new AVCanvas(cvsWrapEl, {
-      bgColor: '#000',
+      bgColor: '#1A1B1E',
       width: width - 24,
       height: height - 300,
     })
@@ -197,9 +203,14 @@ export default function App() {
     cvs.on('paused', () => {
       setPlaying(false)
     })
+  }
 
+  // 初始化编辑器
+  useEffect(() => {
+    init()
+    window.addEventListener('resize', init)
     return () => {
-      cvs.destroy()
+      window.removeEventListener('resize', init)
     }
   }, [cvsWrapEl])
 
@@ -209,7 +220,9 @@ export default function App() {
       return
     }
     const addFakeVideo = async () => {
-      const stream = (await fetch(VideoSrc)).body!
+      const stream = (await fetch(videoAssets[index % videoAssets.length]))
+        .body!
+      index++
       const spr = new VisibleSprite(
         new MP4Clip(stream, {
           __unsafe_hardwareAcceleration__,
@@ -218,6 +231,8 @@ export default function App() {
       await avCvs?.addSprite(spr)
       addSprite2Track('1-video', spr, '视频')
     }
+
+    window.addEventListener('resize', init)
     eventBus.on(EVENTS.ADD_FAKE_VIDEO, addFakeVideo)
     return () => {
       eventBus.off(EVENTS.ADD_FAKE_VIDEO, addFakeVideo)
@@ -265,8 +280,8 @@ export default function App() {
       <div ref={(el) => setCvsWrapEl(el)}></div>
       <Tooltip title="本地导入">
         <Button
-          shape="circle"
-          icon={<UploadOutlined />}
+          type="text"
+          icon={<UploadOutlined className={styles.videoIcon} />}
           onClick={async () => {
             const stream = (
               await loadFile({ 'video/*': ['.mp4', '.mov'] })
@@ -282,8 +297,14 @@ export default function App() {
         />
       </Tooltip>
       <Button
-        shape="circle"
-        icon={playing ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
+        type="text"
+        icon={
+          playing ? (
+            <PauseCircleOutlined className={styles.videoIcon} />
+          ) : (
+            <PlayCircleOutlined className={styles.videoIcon} />
+          )
+        }
         onClick={async () => {
           if (avCvs == null || tlState.current == null) return
           if (playing) {
@@ -294,8 +315,8 @@ export default function App() {
         }}
       />
       <Button
-        shape="circle"
-        icon={<ExportOutlined />}
+        type="text"
+        icon={<ExportOutlined className={styles.videoIcon} />}
         onClick={async () => {
           if (avCvs == null) return
           ;(await avCvs.createCombinator({ __unsafe_hardwareAcceleration__ }))

@@ -4,73 +4,69 @@ import {
   VideoCameraOutlined,
   UserOutlined,
 } from '@ant-design/icons'
-import { Layout, Menu, theme, Row, Col, ConfigProvider } from 'antd'
+import { Layout, Menu, Row, Col } from 'antd'
 import styles from './App.module.less'
+import colorStyles from './color.module.less'
 import VideoUI from './components/video'
 import Form from './components/form'
+import cs from 'classnames'
 
 const { Header, Content, Sider } = Layout
 
 const items = [
   {
-    key: '2',
+    key: '1',
     icon: <VideoCameraOutlined />,
     label: '视频生成',
   },
   {
-    key: '1',
+    key: '2',
     icon: React.createElement(UserOutlined),
     label: '用户中心',
   },
 ]
 
 const App = () => {
-  const {
-    token: { colorBgContainer },
-  } = theme.useToken()
-
   return (
-    <ConfigProvider>
+    <Layout>
+      <Header
+        className={styles.navBar}
+        style={{ display: 'flex', alignItems: 'center' }}
+      >
+        <OpenAIOutlined style={{ color: 'white' }} />
+      </Header>
       <Layout>
-        <Header style={{ display: 'flex', alignItems: 'center' }}>
-          <OpenAIOutlined style={{ color: 'white' }} />
+        <Sider
+          width={200}
+          style={{ borderTop: '1px' }}
+          className={styles.sideBar}
+        >
           <Menu
-            theme="dark"
-            mode="horizontal"
-            defaultSelectedKeys={['2']}
-            style={{ flex: 1, minWidth: 0 }}
+            className={styles.sideMenu}
+            mode="inline"
+            defaultSelectedKeys={['1']}
+            defaultOpenKeys={['sub1']}
+            items={items}
           />
-        </Header>
+        </Sider>
         <Layout>
-          <Sider width={200} style={{ background: colorBgContainer }}>
-            <Menu
-              mode="inline"
-              defaultSelectedKeys={['1']}
-              defaultOpenKeys={['sub1']}
-              style={{ height: '100%', borderRight: 0 }}
-              items={items}
-            />
-          </Sider>
-          <Layout>
-            <Content
-              style={{
-                margin: '24px',
-                minHeight: 'calc(100vh - 112px)',
-              }}
-            >
-              <Row gutter={24} style={{ height: '100%' }}>
-                <Col flex="436px" className={styles.formPanel}>
-                  <Form />
-                </Col>
-                <Col flex="auto" className="video-wrapper">
-                  <VideoUI />
-                </Col>
-              </Row>
-            </Content>
-          </Layout>
+          <Content
+            style={{
+              minHeight: 'calc(100vh - 64px)',
+            }}
+          >
+            <Row style={{ height: '100%' }}>
+              <Col flex="436px" className={styles.formPanel}>
+                <Form />
+              </Col>
+              <Col flex="auto" className={styles.videoWrapper}>
+                <VideoUI />
+              </Col>
+            </Row>
+          </Content>
         </Layout>
       </Layout>
-    </ConfigProvider>
+    </Layout>
   )
 }
 

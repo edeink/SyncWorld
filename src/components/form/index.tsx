@@ -3,6 +3,7 @@ import cs from 'classnames'
 import styles from './index.module.less'
 import { useState } from 'react'
 import eventBus, { EVENTS } from '../../helper/event'
+import { CloudUploadOutlined } from '@ant-design/icons'
 
 const { TextArea } = Input
 
@@ -24,17 +25,21 @@ const Form = () => {
         >
           <iframe width="950" height="600" src="https://threejs.org/editor/" />
         </Modal>
-        <Space direction="vertical">
+        <Space direction="vertical" size={12}>
           <Row>
             <Upload
-              name="avatar"
-              listType="picture-card"
+              className={styles.imageUpload}
               showUploadList={false}
               action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
               beforeUpload={() => {}}
               onChange={() => {}}
             >
-              <div>请上传单张图片</div>
+              <div>
+                <Space>
+                  <CloudUploadOutlined />
+                  <span>请上传单张图片</span>
+                </Space>
+              </div>
             </Upload>
           </Row>
 
@@ -42,13 +47,17 @@ const Form = () => {
           <Row gutter={[12, 12]}>
             {new Array(11).fill(0).map(() => (
               <Col span={6}>
-                <Image width={'100%'} fallback={fallbackData} />
+                <Image
+                  className={styles.imageSelect}
+                  width={'100%'}
+                  fallback={fallbackData}
+                />
               </Col>
             ))}
             <Col span={6}>
               <Button
                 size="large"
-                style={{ height: '100%' }}
+                className={styles.customButton}
                 onClick={() => setOpen(true)}
               >
                 Custom
@@ -60,13 +69,17 @@ const Form = () => {
           <Row gutter={[12, 12]}>
             {new Array(11).fill(0).map(() => (
               <Col span={6}>
-                <Image width={'100%'} fallback={fallbackData} />
+                <Image
+                  className={styles.imageSelect}
+                  width={'100%'}
+                  fallback={fallbackData}
+                />
               </Col>
             ))}
             <Col span={6}>
               <Button
                 size="large"
-                style={{ height: '100%' }}
+                className={styles.customButton}
                 onClick={() => setOpen(true)}
               >
                 Custom
@@ -74,10 +87,20 @@ const Form = () => {
             </Col>
           </Row>
           <Row>
-            <TextArea rows={4} placeholder="Positive Prompt" maxLength={6} />
+            <TextArea
+              className={styles.textarea}
+              rows={4}
+              placeholder="Positive Prompt"
+              maxLength={6}
+            />
           </Row>
           <Row>
-            <TextArea rows={4} placeholder="Negative Prompt" maxLength={6} />
+            <TextArea
+              className={styles.textarea}
+              rows={4}
+              placeholder="Negative Prompt"
+              maxLength={6}
+            />
           </Row>
         </Space>
       </div>

@@ -1,44 +1,35 @@
+@import './color.module.less';
+
+.navBar {
+  background-color: @bgColor;
+  border-bottom: 1px solid @splitColor;
+}
+.sideBar {
+  background-color: @bgColor;
+  border-right: 1px solid @splitColor;
+  .sideMenu {
+    color: @textColor;
+    background-color: @bgColor;
+    :global {
+      .ant-menu-item {
+        color: @textColor;
+        background-color: @bgColor;
+        &.ant-menu-item-selected,
+        &.ant-menu-item-active {
+          border-radius: 8px;
+          color: @textColor !important;
+          background-color: @activeBgColor;
+        }
+      }
+    }
+  }
+}
 .formPanel {
   position: relative;
-  height: calc(100vh - 114px);
-  padding: 24px;
-  background: white;
-  border-radius: 8px;
+  background-color: @bgColor;
 }
-
-.linearGradientButton {
-  > span {
-    position: relative;
-  }
-  &::before {
-    content: '';
-    background: linear-gradient(135deg, #6253e1, #04befe);
-    position: absolute;
-    inset: -1px;
-    opacity: 1;
-    transition: all 0.3s;
-    border-radius: inherit;
-  }
-
-  &:hover::before {
-    opacity: 0;
-  }
-}
-
-.formContent {
-  padding-bottom: 24px;
-  height: calc(100vh - 200px);
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.formFooter {
+.videoWrapper {
   padding-top: 24px;
-  width: 100%;
-  border-top: 1px solid #dde2f0;
-  box-shadow: 0 6px 32px 0 rgba(33, 37, 51, 0.06);
-
-  .footerButton {
-    width: 100%;
-  }
+  padding-right: 24px;
+  background: @bgColor;
 }
