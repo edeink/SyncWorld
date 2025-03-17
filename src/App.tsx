@@ -1,5 +1,4 @@
 import {
-  OpenAIOutlined,
   VideoCameraOutlined,
   UserOutlined,
   BulbOutlined,
@@ -7,7 +6,7 @@ import {
 import { Layout, Menu } from 'antd'
 import styles from './App.module.less'
 import {
-  BrowserRouter as Router,
+  HashRouter as Router,
   Routes,
   Route,
   useLocation,

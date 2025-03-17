@@ -27,7 +27,7 @@ import styles from './index.module.less'
 export async function createFileWriter(
   extName = 'mp4'
 ): Promise<FileSystemWritableFileStream> {
-  const fileHandle = await window.showSaveFilePicker({
+  const fileHandle = await (window as any).showSaveFilePicker({
     suggestedName: `WebAV-export-${Date.now()}.${extName}`,
   })
   return fileHandle.createWritable()
@@ -114,7 +114,7 @@ const TimelineEditor = ({
           if (v == null) return
           timelineState.current = v
         }}
-        onChange={(d) => {}}
+        onChange={() => {}}
         style={{ width: '100%', height: '200px' }}
         scale={scale}
         editorData={tlData}
@@ -166,7 +166,7 @@ const videoAssets = [Fake01VidoeSrc, Fake02VideoSrc, Fake03VideoSrc]
 
 export default function App() {
   const [avCvs, setAVCvs] = useState<AVCanvas | null>(null)
-  const tlState = useRef<TimelineState>()
+  const tlState = useRef<TimelineState | undefined>(undefined)
 
   const [playing, setPlaying] = useState(false)
 
@@ -358,7 +358,7 @@ export default function App() {
         onSplitAction={async (action: TLActionWithName) => {
           const spr = actionSpriteMap.get(action)
           if (avCvs == null || spr == null || tlState.current == null) return
-          const newClips = await spr
+          const newClips = await (spr as any)
             .getClip()
             .split(tlState.current.getTime() * 1e6 - spr.time.offset)
           // 移除原有对象
@@ -395,7 +395,7 @@ export default function App() {
 }
 
 async function loadFile(accept: Record<string, string[]>) {
-  const [fileHandle] = await window.showOpenFilePicker({
+  const [fileHandle] = await (window as any).showOpenFilePicker({
     types: [{ accept }],
   })
   return (await fileHandle.getFile()) as File
