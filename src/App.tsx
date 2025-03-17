@@ -1,39 +1,66 @@
-import React from 'react'
 import {
   OpenAIOutlined,
   VideoCameraOutlined,
   UserOutlined,
+  BulbOutlined,
 } from '@ant-design/icons'
-import { Layout, Menu, Row, Col } from 'antd'
+import { Layout, Menu } from 'antd'
 import styles from './App.module.less'
-import colorStyles from './color.module.less'
-import VideoUI from './components/video'
-import Form from './components/form'
-import cs from 'classnames'
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom'
+import VideoContainer from './containers/video'
+import PreviewContainer from './containers/preview'
+import UserProfile from './containers/user'
+import Logo from './assets/logo.webp'
 
 const { Header, Content, Sider } = Layout
 
 const items = [
   {
-    key: '1',
+    key: '/preview',
+    icon: <BulbOutlined />,
+    label: '灵感广场',
+  },
+  {
+    key: '/video',
     icon: <VideoCameraOutlined />,
     label: '视频生成',
   },
   {
-    key: '2',
-    icon: React.createElement(UserOutlined),
+    key: '/user',
+    icon: <UserOutlined />,
     label: '用户中心',
   },
 ]
 
+const Sidebar = () => {
+  const location = useLocation() // 获取当前路径
+  const navigate = useNavigate()
+
+  return (
+    <Menu
+      className={styles.sideMenu}
+      mode="inline"
+      selectedKeys={[location.pathname]} // 让菜单选中当前路由
+      onClick={(e) => navigate(e.key)} // 点击菜单跳转
+      items={items}
+    />
+  )
+}
+
 const App = () => {
   return (
-    <Layout>
+    <Router>
       <Header
         className={styles.navBar}
         style={{ display: 'flex', alignItems: 'center' }}
       >
-        <OpenAIOutlined style={{ color: 'white' }} />
+        <img src={Logo} alt="logo" style={{ width: '40px', height: '40px' }} />
       </Header>
       <Layout>
         <Sider
@@ -41,32 +68,22 @@ const App = () => {
           style={{ borderTop: '1px' }}
           className={styles.sideBar}
         >
-          <Menu
-            className={styles.sideMenu}
-            mode="inline"
-            defaultSelectedKeys={['1']}
-            defaultOpenKeys={['sub1']}
-            items={items}
-          />
+          <Sidebar />
         </Sider>
-        <Layout>
-          <Content
-            style={{
-              minHeight: 'calc(100vh - 64px)',
-            }}
-          >
-            <Row style={{ height: '100%' }}>
-              <Col flex="436px" className={styles.formPanel}>
-                <Form />
-              </Col>
-              <Col flex="auto" className={styles.videoWrapper}>
-                <VideoUI />
-              </Col>
-            </Row>
-          </Content>
-        </Layout>
+        <Content
+          className={styles.content}
+          style={{
+            minHeight: 'calc(100vh - 64px)',
+          }}
+        >
+          <Routes>
+            <Route path="/preview" element={<PreviewContainer />} />
+            <Route path="/video" element={<VideoContainer />} />
+            <Route path="/user" element={<UserProfile />} />
+          </Routes>
+        </Content>
       </Layout>
-    </Layout>
+    </Router>
   )
 }
 

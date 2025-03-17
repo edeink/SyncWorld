@@ -20,7 +20,8 @@
     "classnames": "^2.5.1",
     "events": "^3.3.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
@@ -33,6 +34,7 @@
     "globals": "^15.15.0",
     "less": "^4.2.2",
     "prettier": "^3.5.3",
+    "react-masonry-css": "^1.0.16",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.24.1",
     "vite": "^6.2.0"
