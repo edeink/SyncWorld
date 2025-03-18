@@ -1,9 +1,8 @@
-import { Row, Col, Upload, Image, Button, Space, Modal, Input } from 'antd'
+import { Row, Col, Image, Button, Space, Modal, Input } from 'antd'
 import cs from 'classnames'
 import styles from './index.module.less'
 import { useState } from 'react'
 import eventBus, { EVENTS } from '../../../helper/event'
-import { CloudUploadOutlined } from '@ant-design/icons'
 import UploadImage from '../../../components/upload'
 import ThreeEditor from '../../../components/editor'
 
