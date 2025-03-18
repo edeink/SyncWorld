@@ -15,7 +15,7 @@ import {
 import VideoContainer from './containers/video'
 import PreviewContainer from './containers/preview'
 import UserProfile from './containers/user'
-import Logo from './assets/logo.webp'
+import Logo from './assets/logo.png'
 
 const { Header, Content, Sider } = Layout
 
@@ -69,12 +69,7 @@ const App = () => {
         >
           <Sidebar />
         </Sider>
-        <Content
-          className={styles.content}
-          style={{
-            minHeight: 'calc(100vh - 64px)',
-          }}
-        >
+        <Content className={styles.content}>
           <Routes>
             <Route path="/preview" element={<PreviewContainer />} />
             <Route path="/video" element={<VideoContainer />} />

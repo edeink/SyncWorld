@@ -16,16 +16,6 @@ const Form = () => {
   return (
     <>
       <div className={styles.formContent}>
-        <Modal
-          title="动作录入"
-          centered
-          open={open}
-          onOk={() => setOpen(false)}
-          onCancel={() => setOpen(false)}
-          width={1000}
-        >
-          <iframe width="950" height="600" src="https://threejs.org/editor/" />
-        </Modal>
         <Space direction="vertical" size={12}>
           <Row>
             <UploadImage />
@@ -74,6 +64,16 @@ const Form = () => {
           </Row>
         </Space>
       </div>
+      <Modal
+        title="动作录入"
+        centered
+        open={open}
+        onOk={() => setOpen(false)}
+        onCancel={() => setOpen(false)}
+        width={1000}
+      >
+        <iframe width="950" height="600" src="https://threejs.org/editor/" />
+      </Modal>
       <div className={styles.formFooter}>
         <Button
           className={cs(styles.linearGradientButton, styles.footerButton)}

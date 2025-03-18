@@ -70,45 +70,43 @@ const TimelineEditor = ({
     null
   )
   return (
-    <div className="">
-      <div>
-        <Tooltip title="缩放">
-          <Button
-            type="text"
-            icon={<ZoomOutOutlined className={styles.videoIcon} />}
-            onClick={() => setScale(scale + 1)}
-          />
-        </Tooltip>
-        <Tooltip title="缩放">
-          <Button
-            type="text"
-            icon={<ZoomInOutlined className={styles.videoIcon} />}
-            onClick={() => setScale(scale - 1 > 1 ? scale - 1 : 1)}
-          />
-        </Tooltip>
-        <Tooltip title="删除">
-          <Button
-            type="text"
-            icon={<DeleteOutlined className={styles.videoIcon} />}
-            disabled={activeAction == null}
-            onClick={() => {
-              if (activeAction == null) return
-              onDeleteAction(activeAction)
-            }}
-          />
-        </Tooltip>
-        <Tooltip title="分割">
-          <Button
-            type="text"
-            icon={<SplitCellsOutlined className={styles.videoIcon} />}
-            disabled={activeAction == null}
-            onClick={() => {
-              if (activeAction == null) return
-              onSplitAction(activeAction)
-            }}
-          />
-        </Tooltip>
-      </div>
+    <>
+      <Tooltip title="缩放">
+        <Button
+          type="text"
+          icon={<ZoomOutOutlined className={styles.videoIcon} />}
+          onClick={() => setScale(scale + 1)}
+        />
+      </Tooltip>
+      <Tooltip title="缩放">
+        <Button
+          type="text"
+          icon={<ZoomInOutlined className={styles.videoIcon} />}
+          onClick={() => setScale(scale - 1 > 1 ? scale - 1 : 1)}
+        />
+      </Tooltip>
+      <Tooltip title="删除">
+        <Button
+          type="text"
+          icon={<DeleteOutlined className={styles.videoIcon} />}
+          disabled={activeAction == null}
+          onClick={() => {
+            if (activeAction == null) return
+            onDeleteAction(activeAction)
+          }}
+        />
+      </Tooltip>
+      <Tooltip title="分割">
+        <Button
+          type="text"
+          icon={<SplitCellsOutlined className={styles.videoIcon} />}
+          disabled={activeAction == null}
+          onClick={() => {
+            if (activeAction == null) return
+            onSplitAction(activeAction)
+          }}
+        />
+      </Tooltip>
       <Timeline
         ref={(v) => {
           if (v == null) return
@@ -154,7 +152,7 @@ const TimelineEditor = ({
         }}
         autoScroll
       />
-    </div>
+    </>
   )
 }
 
@@ -170,6 +168,7 @@ export default function App() {
 
   const [playing, setPlaying] = useState(false)
 
+  const [refContainer, setRefContainer] = useState<HTMLDivElement | null>(null)
   const [cvsWrapEl, setCvsWrapEl] = useState<HTMLDivElement | null>(null)
   const [tlData, setTLData] = useState<TimelineRow[]>([
     { id: '1-video', actions: [] },
@@ -181,7 +180,7 @@ export default function App() {
   const init = () => {
     if (cvsWrapEl == null) return
     avCvs?.destroy()
-    const dom = document.querySelector('.canvas-wrap')?.parentElement
+    const dom = refContainer?.parentElement
     if (!dom) {
       return
     }
@@ -190,7 +189,7 @@ export default function App() {
     const cvs = new AVCanvas(cvsWrapEl, {
       bgColor: '#1A1B1E',
       width: width - 24,
-      height: height - 300,
+      height: height - 270,
     })
     setAVCvs(cvs)
     cvs.on('timeupdate', (time) => {
@@ -276,7 +275,7 @@ export default function App() {
   }
 
   return (
-    <div className="canvas-wrap">
+    <div className={styles.canvasWrap} ref={(el) => setRefContainer(el)}>
       <div ref={(el) => setCvsWrapEl(el)}></div>
       <Tooltip title="本地导入">
         <Button
@@ -296,34 +295,38 @@ export default function App() {
           }}
         />
       </Tooltip>
-      <Button
-        type="text"
-        icon={
-          playing ? (
-            <PauseCircleOutlined className={styles.videoIcon} />
-          ) : (
-            <PlayCircleOutlined className={styles.videoIcon} />
-          )
-        }
-        onClick={async () => {
-          if (avCvs == null || tlState.current == null) return
-          if (playing) {
-            avCvs.pause()
-          } else {
-            avCvs.play({ start: tlState.current.getTime() * 1e6 })
+      <Tooltip title="播放">
+        <Button
+          type="text"
+          icon={
+            playing ? (
+              <PauseCircleOutlined className={styles.videoIcon} />
+            ) : (
+              <PlayCircleOutlined className={styles.videoIcon} />
+            )
           }
-        }}
-      />
-      <Button
-        type="text"
-        icon={<ExportOutlined className={styles.videoIcon} />}
-        onClick={async () => {
-          if (avCvs == null) return
-          ;(await avCvs.createCombinator({ __unsafe_hardwareAcceleration__ }))
-            .output()
-            .pipeTo(await createFileWriter())
-        }}
-      />
+          onClick={async () => {
+            if (avCvs == null || tlState.current == null) return
+            if (playing) {
+              avCvs.pause()
+            } else {
+              avCvs.play({ start: tlState.current.getTime() * 1e6 })
+            }
+          }}
+        />
+      </Tooltip>
+      <Tooltip title="导出">
+        <Button
+          type="text"
+          icon={<ExportOutlined className={styles.videoIcon} />}
+          onClick={async () => {
+            if (avCvs == null) return
+            ;(await avCvs.createCombinator({ __unsafe_hardwareAcceleration__ }))
+              .output()
+              .pipeTo(await createFileWriter())
+          }}
+        />
+      </Tooltip>
       <TimelineEditor
         timelineData={tlData}
         timelineState={tlState}
