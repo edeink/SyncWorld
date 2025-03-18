@@ -1,6 +1,6 @@
 import { Col, Row } from 'antd'
 import styles from './index.module.less'
-import Form from '../../components/form'
+import Form from './form'
 import Video from '../../components/video'
 
 const VideoContainer = () => (

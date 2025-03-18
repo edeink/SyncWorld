@@ -2,8 +2,9 @@ import { Row, Col, Upload, Image, Button, Space, Modal, Input } from 'antd'
 import cs from 'classnames'
 import styles from './index.module.less'
 import { useState } from 'react'
-import eventBus, { EVENTS } from '../../helper/event'
+import eventBus, { EVENTS } from '../../../helper/event'
 import { CloudUploadOutlined } from '@ant-design/icons'
+import UploadImage from '../../../components/upload'
 
 const { TextArea } = Input
 
@@ -27,52 +28,19 @@ const Form = () => {
         </Modal>
         <Space direction="vertical" size={12}>
           <Row>
-            <Upload
-              className={styles.imageUpload}
-              showUploadList={false}
-              action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
-              beforeUpload={() => {}}
-              onChange={() => {}}
-            >
-              <div>
-                <Space>
-                  <CloudUploadOutlined />
-                  <span>请上传单张图片</span>
-                </Space>
-              </div>
-            </Upload>
+            <UploadImage />
           </Row>
-
+          <label>相机</label>
+          <Row></Row>
           <label>动作</label>
           <Row gutter={[12, 12]}>
             {new Array(11).fill(0).map(() => (
               <Col span={6}>
                 <Image
+                  src={fallbackData}
+                  fallback={fallbackData}
                   className={styles.imageSelect}
                   width={'100%'}
-                  fallback={fallbackData}
-                />
-              </Col>
-            ))}
-            <Col span={6}>
-              <Button
-                size="large"
-                className={styles.customButton}
-                onClick={() => setOpen(true)}
-              >
-                Custom
-              </Button>
-            </Col>
-          </Row>
-
-          <label>相机</label>
-          <Row gutter={[12, 12]}>
-            {new Array(11).fill(0).map(() => (
-              <Col span={6}>
-                <Image
-                  className={styles.imageSelect}
-                  width={'100%'}
-                  fallback={fallbackData}
                 />
               </Col>
             ))}

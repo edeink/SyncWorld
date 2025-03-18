@@ -1,0 +1,15 @@
+@import '../../color.module.less';
+
+.imageUpload {
+  width: 100%;
+  color: @inputPlaceColor;
+  :global {
+    .ant-upload-select {
+      width: 100% !important;
+    }
+  }
+  &:hover {
+    cursor: pointer;
+    border-color: @activeBorderColor;
+  }
+}
