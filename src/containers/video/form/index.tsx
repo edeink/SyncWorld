@@ -5,6 +5,7 @@ import { useState } from 'react'
 import eventBus, { EVENTS } from '../../../helper/event'
 import { CloudUploadOutlined } from '@ant-design/icons'
 import UploadImage from '../../../components/upload'
+import ThreeEditor from '../../../components/editor'
 
 const { TextArea } = Input
 
@@ -31,7 +32,9 @@ const Form = () => {
             <UploadImage />
           </Row>
           <label>相机</label>
-          <Row></Row>
+          <Row>
+            <ThreeEditor />
+          </Row>
           <label>动作</label>
           <Row gutter={[12, 12]}>
             {new Array(11).fill(0).map(() => (
