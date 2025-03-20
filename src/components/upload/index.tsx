@@ -6,9 +6,13 @@ import styles from './index.module.less'
 
 interface UploadImageProps {
   multiple?: boolean
+  onChange: () => void
 }
 
-const UploadImage: React.FC<UploadImageProps> = ({ multiple = false }) => {
+const UploadImage: React.FC<UploadImageProps> = ({
+  multiple = false,
+  onChange,
+}) => {
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [previewVisible, setPreviewVisible] = useState(false)
   const [previewImage, setPreviewImage] = useState<string>('')
@@ -29,6 +33,7 @@ const UploadImage: React.FC<UploadImageProps> = ({ multiple = false }) => {
 
   const handleChange: UploadProps['onChange'] = ({ fileList }) => {
     setFileList(fileList)
+    onChange()
   }
 
   const beforeUpload = (file: File) => {

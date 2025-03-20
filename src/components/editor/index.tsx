@@ -1,24 +1,22 @@
-import React, { useRef } from 'react'
+import React from 'react'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, TransformControls } from '@react-three/drei'
-import * as THREE from 'three'
+import { OrbitControls } from '@react-three/drei'
+import Model from './model'
+import LightIndicator from './light'
+import { Vector3 } from 'three'
 
 const ThreeEditor: React.FC = () => {
-  const meshRef = useRef<THREE.Mesh>(null)
-
   return (
     <Canvas camera={{ position: [0, 2, 5], fov: 75 }}>
-      <ambientLight />
-      <pointLight position={[10, 10, 10]} />
-
-      {/* 可移动的立方体 */}
-      <TransformControls>
-        <mesh ref={meshRef} scale={[1, 1, 1]}>
-          <boxGeometry />
-          <meshStandardMaterial color="orange" />
-        </mesh>
-      </TransformControls>
-
+      <color attach="background" args={['#25272c']} />
+      <ambientLight intensity={2} />
+      <LightIndicator position={new Vector3(2, 2, -0)} />
+      {/* <LightIndicator position={new Vector3(2, -2, -0)} /> */}
+      {/* <LightIndicator position={new Vector3(-2, 2, -0)} /> */}
+      {/* <LightIndicator position={new Vector3(-2, -2, -0)} /> */}
+      <LightIndicator position={new Vector3(0, 0, 2)} intensity={4} />
+      {/* <LightIndicator position={new Vector3(0, 0, -2)}  intensity={4}/> */}
+      <Model />
       <OrbitControls />
     </Canvas>
   )

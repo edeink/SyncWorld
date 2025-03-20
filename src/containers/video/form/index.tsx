@@ -1,10 +1,51 @@
-import { Row, Col, Image, Button, Space, Modal, Input } from 'antd'
+import { Row, Col, Image, Button, Space, Modal, Input, Tag } from 'antd'
 import cs from 'classnames'
 import styles from './index.module.less'
 import { useState } from 'react'
 import eventBus, { EVENTS } from '../../../helper/event'
 import UploadImage from '../../../components/upload'
 import ThreeEditor from '../../../components/editor'
+import cutoutPng from '../../../assets/demo/cutout.png'
+import maskPng from '../../../assets/demo/mask.png'
+import envWebp01 from '../../../assets/demo/env/env1.webp'
+import envWebp02 from '../../../assets/demo/env/env2.webp'
+import envWebp03 from '../../../assets/demo/env/env3.webp'
+import envWebp04 from '../../../assets/demo/env/env4.webp'
+import envWebp05 from '../../../assets/demo/env/env5.webp'
+import envWebp06 from '../../../assets/demo/env/env6.webp'
+import envWebp07 from '../../../assets/demo/env/env7.webp'
+import envWebp08 from '../../../assets/demo/env/env8.webp'
+import outputPng01 from '../../../assets/demo/output/output1.png'
+import outputPng02 from '../../../assets/demo/output/output2.png'
+import outputPng03 from '../../../assets/demo/output/output3.png'
+import outputPng04 from '../../../assets/demo/output/output4.png'
+import outputPng05 from '../../../assets/demo/output/output5.png'
+import outputPng06 from '../../../assets/demo/output/output6.png'
+import outputPng07 from '../../../assets/demo/output/output7.png'
+import outputPng08 from '../../../assets/demo/output/output8.png'
+import ImageSelector from '../../../components/image-selector'
+
+const sceneAssets = [
+  { src: envWebp01, alt: '场景1' },
+  { src: envWebp02, alt: '场景2' },
+  { src: envWebp03, alt: '场景3' },
+  { src: envWebp04, alt: '场景4' },
+  { src: envWebp05, alt: '场景5' },
+  { src: envWebp06, alt: '场景6' },
+  { src: envWebp07, alt: '场景7' },
+  { src: envWebp08, alt: '场景8' },
+]
+
+const outputAssets = [
+  { src: outputPng01, alt: '场景1' },
+  { src: outputPng02, alt: '场景2' },
+  { src: outputPng03, alt: '场景3' },
+  { src: outputPng04, alt: '场景4' },
+  { src: outputPng05, alt: '场景5' },
+  { src: outputPng06, alt: '场景6' },
+  { src: outputPng07, alt: '场景7' },
+  { src: outputPng08, alt: '场景8' },
+]
 
 const { TextArea } = Input
 
@@ -13,38 +54,100 @@ const fallbackData =
 
 const Form = () => {
   const [open, setOpen] = useState(false)
+  const [uploaded, setUploaded] = useState(true)
+  const [outputSrc, setOutputSrc] = useState('')
+  const afterUpload = () => {
+    setUploaded(true)
+  }
+  const handleSelectScene = (src: string, index: number) => {
+    setOutputSrc(outputAssets[index].src)
+  }
   return (
     <>
       <div className={styles.formContent}>
         <Space direction="vertical" size={12}>
           <Row>
-            <UploadImage />
+            <UploadImage onChange={afterUpload} />
           </Row>
-          <label>相机</label>
-          <Row>
-            <ThreeEditor />
-          </Row>
-          <label>动作</label>
+          {uploaded && (
+            <>
+              <Row gutter={4}>
+                <Col span={8}>
+                  <Tag color="#2b2c3a">抠图</Tag>
+                </Col>
+                <Col span={8}>
+                  <Tag color="#2b2c3a">Mask</Tag>
+                </Col>
+                <Col span={8}>
+                  <Tag color="#2b2c3a">3D模型</Tag>
+                </Col>
+              </Row>
+              <Row gutter={4} justify="space-around" align="middle">
+                <Col span={8}>
+                  <Image
+                    src={cutoutPng}
+                    fallback={fallbackData}
+                    className={styles.imageSelect}
+                    width={'100%'}
+                  />
+                </Col>
+                <Col span={8}>
+                  <Image
+                    src={maskPng}
+                    fallback={fallbackData}
+                    className={styles.imageSelect}
+                    width={'100%'}
+                  />
+                </Col>
+                <Col span={8}>
+                  <ThreeEditor />
+                </Col>
+              </Row>
+            </>
+          )}
+          <label>场景</label>
           <Row gutter={[12, 12]}>
-            {new Array(11).fill(0).map(() => (
-              <Col span={6}>
-                <Image
-                  src={fallbackData}
-                  fallback={fallbackData}
-                  className={styles.imageSelect}
-                  width={'100%'}
-                />
-              </Col>
-            ))}
-            <Col span={6}>
+            <Col span={24}>
+              <ImageSelector
+                images={sceneAssets}
+                onSelect={handleSelectScene}
+              />
+            </Col>
+            <Col span={24}>
               <Button
                 size="large"
+                color="default"
+                variant="solid"
                 className={styles.customButton}
                 onClick={() => setOpen(true)}
               >
                 Custom
               </Button>
+              <Modal
+                title="动作录入"
+                centered
+                open={open}
+                onOk={() => setOpen(false)}
+                onCancel={() => setOpen(false)}
+                width={1000}
+              >
+                <iframe
+                  width="950"
+                  height="600"
+                  src="https://threejs.org/editor/"
+                />
+              </Modal>
             </Col>
+            {outputSrc && (
+              <Col>
+                <Image
+                  src={outputSrc}
+                  fallback={fallbackData}
+                  className={styles.imageSelect}
+                  width={'100%'}
+                />
+              </Col>
+            )}
           </Row>
           <Row>
             <TextArea
@@ -64,16 +167,6 @@ const Form = () => {
           </Row>
         </Space>
       </div>
-      <Modal
-        title="动作录入"
-        centered
-        open={open}
-        onOk={() => setOpen(false)}
-        onCancel={() => setOpen(false)}
-        width={1000}
-      >
-        <iframe width="950" height="600" src="https://threejs.org/editor/" />
-      </Modal>
       <div className={styles.formFooter}>
         <Button
           className={cs(styles.linearGradientButton, styles.footerButton)}
