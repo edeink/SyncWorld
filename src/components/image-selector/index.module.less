@@ -1,0 +1,25 @@
+@import '../../color.module.less';
+
+/* 图片容器的基础样式 */
+.imageContainer {
+  cursor: pointer;
+  border: 2px solid @activeBgColor; /* 蓝色边框 */
+  border-radius: 8px;
+  &:global {
+    /* 悬停效果 */
+    &:hover {
+      border: 2px solid @splitColor;
+    }
+
+    /* 选中状态的样式 */
+    &.selected {
+      border: 2px solid @activeBorderColor;
+    }
+  }
+}
+
+/* 图片本身的样式 */
+.imageItem {
+  object-fit: cover;
+  border-radius: 8px;
+}

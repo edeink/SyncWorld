@@ -59,7 +59,7 @@ const Form = () => {
   const afterUpload = () => {
     setUploaded(true)
   }
-  const handleSelectScene = (src: string, index: number) => {
+  const handleSelectScene = (_src: string, index: number) => {
     setOutputSrc(outputAssets[index].src)
   }
   return (
