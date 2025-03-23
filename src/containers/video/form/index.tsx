@@ -9,10 +9,11 @@ import {
   Tag,
   Switch,
   Radio,
+  Progress,
 } from 'antd'
 import cs from 'classnames'
 import styles from './index.module.less'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import eventBus, { EVENTS } from '../../../helper/event'
 import UploadImage from '../../../components/upload'
 import ThreeEditor from '../../../components/editor'
@@ -68,46 +69,86 @@ interface FormProps {
   onChange: (value: any) => void
 }
 
+enum ProgressStep {
+  BeforeStart = 0,
+  AfterUpload = 1,
+  AfterAnalyze = 2,
+}
+
 const Form = (props: FormProps) => {
   const { onChange } = props
   const [open, setOpen] = useState(false)
-  const [uploaded, setUploaded] = useState(true)
+  const [step, setStep] = useState<ProgressStep>(ProgressStep.BeforeStart)
   const [outputSrc, setOutputSrc] = useState('')
+  const [outputLoading, setOutputLoading] = useState(false)
   const [cameraControl, setCameraControl] = useState(false)
   const [cameraControlValue, setCameraControlValue] = useState()
+  const [percent, setPercent] = useState(0)
+
   const afterUpload = () => {
-    setUploaded(true)
+    setStep(ProgressStep.AfterUpload)
   }
-  const handleSelectScene = (_src: string, index: number) => {
-    setOutputSrc(outputAssets[index].src)
+
+  const handleSelectScene = (url: string, index: number) => {
+    if (outputLoading) {
+      return
+    }
+    setOutputSrc(url)
+    setOutputLoading(true)
+    setTimeout(() => {
+      setOutputSrc(outputAssets[index].src)
+      setOutputLoading(false)
+    }, 1000)
   }
+
   const toggleCameraControl = () => {
     setCameraControl(!cameraControl)
   }
+
   const handleCameraControlChange = (value: any) => {
     setCameraControlValue(value)
     onChange(value)
   }
+
+  // Mock 分析数据
+  useEffect(() => {
+    if (percent === 100) {
+      setTimeout(() => {
+        setStep(ProgressStep.AfterAnalyze)
+      }, 300)
+      return
+    }
+    if (step === ProgressStep.AfterUpload) {
+      setTimeout(() => {
+        if (percent < 100) {
+          setPercent(percent + 1)
+        }
+      }, 16)
+    }
+  }, [step, percent])
+
   return (
     <>
       <div className={styles.formContent}>
-        <Space direction="vertical" size={12}>
-          <Row>
-            <UploadImage onChange={afterUpload} />
-          </Row>
-          {uploaded && (
+        <Row gutter={[0, 12]}>
+          <UploadImage onChange={afterUpload} />
+          {step === ProgressStep.AfterUpload && (
             <>
-              <Row gutter={4}>
-                <Col span={8}>
-                  <Tag color="#2b2c3a">抠图</Tag>
-                </Col>
-                <Col span={8}>
-                  <Tag color="#2b2c3a">Mask</Tag>
-                </Col>
-                <Col span={8}>
-                  <Tag color="#2b2c3a">3D模型</Tag>
-                </Col>
-              </Row>
+              <div>数据分析中...</div>
+              <Progress percent={percent} />
+            </>
+          )}
+          {step >= ProgressStep.AfterAnalyze && (
+            <>
+              <Col span={8}>
+                <Tag color="#2b2c3a">抠图</Tag>
+              </Col>
+              <Col span={8}>
+                <Tag color="#2b2c3a">Mask</Tag>
+              </Col>
+              <Col span={8}>
+                <Tag color="#2b2c3a">3D模型</Tag>
+              </Col>
               <Row gutter={4} justify="space-around" align="middle">
                 <Col span={8}>
                   <Image
@@ -131,67 +172,72 @@ const Form = (props: FormProps) => {
               </Row>
             </>
           )}
-          <label>场景</label>
-          {uploaded && (
-            <Row gutter={[12, 12]}>
-              <Col span={24}>
-                <ImageSelector
-                  images={sceneAssets}
-                  onSelect={handleSelectScene}
-                />
-              </Col>
-              <Col span={24}>
-                <Button
-                  size="large"
-                  color="default"
-                  variant="solid"
-                  className={styles.customButton}
-                  onClick={() => setOpen(true)}
-                >
-                  Custom
-                </Button>
-                <Modal
-                  title="动作录入"
-                  centered
-                  open={open}
-                  onOk={() => setOpen(false)}
-                  onCancel={() => setOpen(false)}
-                  width={1000}
-                >
-                  <iframe
-                    width="950"
-                    height="600"
-                    src="https://threejs.org/editor/"
-                  />
-                </Modal>
-              </Col>
-              {outputSrc && (
-                <Col>
-                  <Image
-                    src={outputSrc}
-                    fallback={fallbackData}
-                    className={styles.imageSelect}
-                    width={'100%'}
+          {step >= ProgressStep.AfterAnalyze && (
+            <>
+              <label>场景</label>
+              <Row gutter={[12, 12]}>
+                <Col span={24}>
+                  <ImageSelector
+                    images={sceneAssets}
+                    onSelect={handleSelectScene}
                   />
                 </Col>
-              )}
-            </Row>
-          )}
-          <Row gutter={[12, 12]}>
-            <Col span={20}>
-              <label>视角</label>
-            </Col>
-            <Col span={4}>
-              <Switch defaultChecked={false} onChange={toggleCameraControl} />
-            </Col>
-            {cameraControl && (
-              <Row>
-                <VideoPlayer />
-                <Row>
-                  <Col span={4}>
-                    <label>预置</label>
+                <Col span={24}>
+                  <Button
+                    size="large"
+                    color="default"
+                    variant="solid"
+                    className={styles.customButton}
+                    onClick={() => setOpen(true)}
+                  >
+                    Custom
+                  </Button>
+                  <Modal
+                    title="动作录入"
+                    centered
+                    open={open}
+                    onOk={() => setOpen(false)}
+                    onCancel={() => setOpen(false)}
+                    width={1000}
+                  >
+                    <iframe
+                      width="950"
+                      height="600"
+                      src="https://threejs.org/editor/"
+                    />
+                  </Modal>
+                </Col>
+                {outputSrc && (
+                  <Col>
+                    <Image
+                      style={outputLoading ? { filter: 'blur(10px)' } : {}}
+                      src={outputSrc}
+                      fallback={fallbackData}
+                      className={styles.imageSelect}
+                      width={'100%'}
+                    />
                   </Col>
-                  <Col span={20}>
+                )}
+              </Row>
+            </>
+          )}
+          {step >= ProgressStep.AfterAnalyze && (
+            <>
+              <Col span={20}>
+                <label>视角</label>
+              </Col>
+              <Col span={4}>
+                <Switch
+                  disabled={!outputSrc}
+                  defaultChecked={false}
+                  onChange={toggleCameraControl}
+                />
+              </Col>
+              {cameraControl && (
+                <>
+                  <VideoPlayer />
+                  <Space>
+                    <label>预置视角</label>
                     <Radio.Group
                       value={cameraControlValue}
                       onChange={(e) =>
@@ -202,33 +248,35 @@ const Form = (props: FormProps) => {
                       <Radio.Button value="moveUp">Move Up</Radio.Button>
                       <Radio.Button value="compress">Compress</Radio.Button>
                     </Radio.Group>
-                  </Col>
-                </Row>
-              </Row>
-            )}
-          </Row>
-          <Row gutter={[12, 12]}>
-            <Col span={24}>
-              <label>其它说明</label>
-            </Col>
-            <Col span={24}>
-              <TextArea
-                className={styles.textarea}
-                rows={4}
-                placeholder="Positive Prompt"
-                maxLength={6}
-              />
-            </Col>
-            <Col span={24}>
-              <TextArea
-                className={styles.textarea}
-                rows={4}
-                placeholder="Negative Prompt"
-                maxLength={6}
-              />
-            </Col>
-          </Row>
-        </Space>
+                  </Space>
+                </>
+              )}
+            </>
+          )}
+          {step >= ProgressStep.AfterAnalyze && (
+            <Row gutter={[12, 12]}>
+              <Col span={24}>
+                <label>其它说明</label>
+              </Col>
+              <Col span={24}>
+                <TextArea
+                  className={styles.textarea}
+                  rows={4}
+                  placeholder="Positive Prompt"
+                  maxLength={6}
+                />
+              </Col>
+              <Col span={24}>
+                <TextArea
+                  className={styles.textarea}
+                  rows={4}
+                  placeholder="Negative Prompt"
+                  maxLength={6}
+                />
+              </Col>
+            </Row>
+          )}
+        </Row>
       </div>
       <div className={styles.formFooter}>
         <Button

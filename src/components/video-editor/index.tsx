@@ -16,8 +16,9 @@ import {
   PauseCircleOutlined,
   ExportOutlined,
   UploadOutlined,
+  LoadingOutlined,
 } from '@ant-design/icons'
-import { Button, Tooltip } from 'antd'
+import { Button, Spin, Tooltip } from 'antd'
 import eventBus, { EVENTS } from '../../helper/event'
 import styles from './index.module.less'
 
@@ -167,6 +168,7 @@ export default function Video(props: VideoProps) {
   const tlState = useRef<TimelineState | undefined>(undefined)
 
   const [playing, setPlaying] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const [refContainer, setRefContainer] = useState<HTMLDivElement | null>(null)
   const [cvsWrapEl, setCvsWrapEl] = useState<HTMLDivElement | null>(null)
@@ -219,15 +221,19 @@ export default function Video(props: VideoProps) {
       return
     }
     const addFakeVideo = async () => {
-      const stream = (await fetch(src)).body!
-      index++
-      const spr = new VisibleSprite(
-        new MP4Clip(stream, {
-          __unsafe_hardwareAcceleration__,
-        })
-      )
-      await avCvs?.addSprite(spr)
-      addSprite2Track('1-video', spr, '视频')
+      setLoading(true)
+      setTimeout(async () => {
+        const stream = (await fetch(src)).body!
+        index++
+        const spr = new VisibleSprite(
+          new MP4Clip(stream, {
+            __unsafe_hardwareAcceleration__,
+          })
+        )
+        await avCvs?.addSprite(spr)
+        addSprite2Track('1-video', spr, '视频')
+        setLoading(false)
+      }, 1000)
     }
 
     window.addEventListener('resize', init)
@@ -320,7 +326,11 @@ export default function Video(props: VideoProps) {
           icon={<ExportOutlined className={styles.videoIcon} />}
           onClick={async () => {
             if (avCvs == null) return
-            ;(await avCvs.createCombinator({ __unsafe_hardwareAcceleration__ }))
+            ;(
+              await avCvs.createCombinator({
+                __unsafe_hardwareAcceleration__,
+              })
+            )
               .output()
               .pipeTo(await createFileWriter())
           }}
@@ -392,6 +402,11 @@ export default function Video(props: VideoProps) {
           }
         }}
       ></TimelineEditor>
+      {loading && (
+        <div className={styles.loadingVideo}>
+          <Spin indicator={<LoadingOutlined spin />} size="large" />
+        </div>
+      )}
     </div>
   )
 }

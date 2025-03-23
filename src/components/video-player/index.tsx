@@ -66,13 +66,15 @@ const VideoPlayer: React.FC = () => {
 
   return (
     <>
-      <Button
-        style={{ width: '100%', color: 'white' }}
-        onClick={turnLeft}
-        type="text"
-        icon={<UpOutlined />}
-      />
       <Row justify="space-between" align="middle">
+        <Col span={24}>
+          <Button
+            style={{ width: '100%', color: 'white' }}
+            onClick={turnLeft}
+            type="text"
+            icon={<UpOutlined />}
+          />
+        </Col>
         <Col span={2}>
           <Button
             onClick={turnLeft}
@@ -82,13 +84,7 @@ const VideoPlayer: React.FC = () => {
           />
         </Col>
         <Col span={20}>
-          <video
-            key={currentVideo}
-            ref={videoRef}
-            width={341}
-            height={223}
-            controls={false}
-          >
+          <video key={currentVideo} ref={videoRef} width={328} controls={false}>
             <source src={currentVideo} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
@@ -101,13 +97,15 @@ const VideoPlayer: React.FC = () => {
             style={{ color: 'white' }}
           />
         </Col>
+        <Col span={24}>
+          <Button
+            style={{ width: '100%', color: 'white' }}
+            onClick={turnLeft}
+            type="text"
+            icon={<DownOutlined />}
+          />
+        </Col>
       </Row>
-      <Button
-        style={{ width: '100%', color: 'white' }}
-        onClick={turnLeft}
-        type="text"
-        icon={<DownOutlined />}
-      />
     </>
   )
 }

@@ -1,8 +1,16 @@
 @import '../../color.module.less';
 
 .canvasWrap {
+  position: relative;
   border-radius: 8px;
   .videoIcon {
+    color: @textColor;
+  }
+  .loadingVideo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     color: @textColor;
   }
 }
