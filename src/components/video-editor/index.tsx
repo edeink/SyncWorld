@@ -17,9 +17,6 @@ import {
   ExportOutlined,
   UploadOutlined,
 } from '@ant-design/icons'
-import Fake01VidoeSrc from '../../assets/01.mp4'
-import Fake02VideoSrc from '../../assets/02.mp4'
-import Fake03VideoSrc from '../../assets/03.mp4'
 import { Button, Tooltip } from 'antd'
 import eventBus, { EVENTS } from '../../helper/event'
 import styles from './index.module.less'
@@ -160,9 +157,12 @@ const actionSpriteMap = new WeakMap<TimelineAction, VisibleSprite>()
 
 let index = 0
 
-const videoAssets = [Fake01VidoeSrc, Fake02VideoSrc, Fake03VideoSrc]
+interface VideoProps {
+  src: string
+}
 
-export default function App() {
+export default function Video(props: VideoProps) {
+  const { src } = props
   const [avCvs, setAVCvs] = useState<AVCanvas | null>(null)
   const tlState = useRef<TimelineState | undefined>(undefined)
 
@@ -219,8 +219,7 @@ export default function App() {
       return
     }
     const addFakeVideo = async () => {
-      const stream = (await fetch(videoAssets[index % videoAssets.length]))
-        .body!
+      const stream = (await fetch(src)).body!
       index++
       const spr = new VisibleSprite(
         new MP4Clip(stream, {
@@ -236,7 +235,7 @@ export default function App() {
     return () => {
       eventBus.off(EVENTS.ADD_FAKE_VIDEO, addFakeVideo)
     }
-  }, [avCvs])
+  }, [avCvs, src])
 
   // 添加新的轨道
   function addSprite2Track(trackId: string, spr: VisibleSprite, name = '') {
