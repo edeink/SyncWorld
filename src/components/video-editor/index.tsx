@@ -51,7 +51,7 @@ interface VideoProps {
 }
 
 export default function Video({ src }: VideoProps) {
-  const [avCvs, setAVCvs] = useState<AVCanvas | null>(null)
+  const avCvs = useRef<AVCanvas | null>(null)
   const tlState = useRef<TimelineState | undefined>(undefined)
   const [playing, setPlaying] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -67,7 +67,7 @@ export default function Video({ src }: VideoProps) {
   // 初始化 Canvas
   const initCanvas = () => {
     if (!cvsWrapEl) return
-    avCvs?.destroy()
+    avCvs.current?.destroy()
     const dom = refContainer?.parentElement
     if (!dom) return
     const { width, height } = dom.getBoundingClientRect()
@@ -76,10 +76,10 @@ export default function Video({ src }: VideoProps) {
       width: width - 24,
       height: height - 270,
     })
-    setAVCvs(cvs)
     cvs.on('timeupdate', (time) => tlState.current?.setTime(time / 1e6))
     cvs.on('playing', () => setPlaying(true))
     cvs.on('paused', () => setPlaying(false))
+    avCvs.current = cvs
   }
 
   // 监听窗口大小变化
@@ -91,7 +91,7 @@ export default function Video({ src }: VideoProps) {
 
   // 监听视频加载
   useEffect(() => {
-    if (!avCvs) return
+    if (!avCvs.current) return
     const addFakeVideo = async () => {
       setLoading(true)
       setTimeout(async () => {
@@ -99,7 +99,7 @@ export default function Video({ src }: VideoProps) {
         const spr = new VisibleSprite(
           new MP4Clip(stream, { __unsafe_hardwareAcceleration__ })
         )
-        await avCvs.addSprite(spr)
+        await avCvs.current?.addSprite(spr)
         addSpriteToTrack('1-video', spr, '视频')
         setLoading(false)
       }, 1000)
@@ -150,16 +150,16 @@ export default function Video({ src }: VideoProps) {
 
   // 播放暂停
   const handlePlayPause = () => {
-    if (!avCvs || !tlState.current) return
+    if (!avCvs.current || !tlState.current) return
     playing
-      ? avCvs.pause()
-      : avCvs.play({ start: tlState.current.getTime() * 1e6 })
+      ? avCvs.current?.pause()
+      : avCvs.current?.play({ start: tlState.current.getTime() * 1e6 })
   }
 
   // 导出
   const handleExport = async () => {
-    if (!avCvs) return
-    ;(await avCvs.createCombinator({ __unsafe_hardwareAcceleration__ }))
+    if (!avCvs.current) return
+    ;(await avCvs.current.createCombinator({ __unsafe_hardwareAcceleration__ }))
       .output()
       .pipeTo(await createFileWriter())
   }
@@ -178,7 +178,7 @@ export default function Video({ src }: VideoProps) {
             const spr = new VisibleSprite(
               new MP4Clip(stream, { __unsafe_hardwareAcceleration__ })
             )
-            await avCvs?.addSprite(spr)
+            await avCvs.current?.addSprite(spr)
             addSpriteToTrack('1-video', spr, '视频')
           }}
         />
@@ -209,7 +209,7 @@ export default function Video({ src }: VideoProps) {
           if (spr) {
             // Create a new sprite with the same clip
             const newSprite = new VisibleSprite(spr.getClip())
-            avCvs?.addSprite(newSprite)
+            avCvs.current?.addSprite(newSprite)
             return addSpriteToTrack('1-video', newSprite, action.name)
           }
           return null
@@ -217,7 +217,7 @@ export default function Video({ src }: VideoProps) {
         timelineData={tlData}
         timelineState={tlState}
         onPreviewTime={(time) => {
-          avCvs?.previewFrame(time * 1e6)
+          avCvs.current?.previewFrame(time * 1e6)
           return true
         }}
         onOffsetChange={(action) => {
@@ -234,7 +234,7 @@ export default function Video({ src }: VideoProps) {
         }}
         onDeleteAction={(action) => {
           const spr = actionSpriteMap.get(action)
-          if (spr) avCvs?.removeSprite(spr)
+          if (spr) avCvs.current?.removeSprite(spr)
           actionSpriteMap.delete(action)
           setTLData([...tlData])
         }}
