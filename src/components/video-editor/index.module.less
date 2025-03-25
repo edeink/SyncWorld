@@ -13,4 +13,14 @@
     transform: translate(-50%, -50%);
     color: @textColor;
   }
+  .splitAction {
+    border: 1px solid transparent;
+    &.actionActive {
+      border: 1px solid @activeBorderColor;
+    }
+
+    .thumbnail {
+      width: 100%;
+    }
+  }
 }

@@ -14,6 +14,7 @@ import {
 import { Button, Tooltip } from 'antd'
 import styles from './index.module.less'
 import { TLActionWithName } from '.'
+import classNames from 'classnames'
 
 export const TimelineEditor = ({
   timelineData: tlData,
@@ -84,6 +85,7 @@ export const TimelineEditor = ({
           if (v == null) return
           timelineState.current = v
         }}
+        autoScroll
         onChange={() => {}}
         style={{ width: '100%', height: '200px' }}
         scale={scale}
@@ -110,18 +112,26 @@ export const TimelineEditor = ({
         }}
         // @ts-expect-error
         getActionRender={(action: TLActionWithName) => {
-          const actionComp = action.thumbnails
-            ? action.thumbnails.map((item) => {
-                return <img src={URL.createObjectURL(item.img)} key={item.ts} />
-              })
-            : action.name
-
-          if (action.id === activeAction?.id) {
-            return <div className="active-action">{actionComp}</div>
-          }
-          return actionComp
+          return (
+            <div
+              className={classNames(styles.splitAction, {
+                [styles.actionActive]: action.id === activeAction?.id,
+              })}
+            >
+              {action.thumbnails
+                ? action.thumbnails.map((item) => {
+                    return (
+                      <img
+                        className={styles.thumbnail}
+                        src={URL.createObjectURL(item.img)}
+                        key={item.ts}
+                      />
+                    )
+                  })
+                : action.name}
+            </div>
+          )
         }}
-        autoScroll
       />
     </>
   )

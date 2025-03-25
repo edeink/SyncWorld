@@ -91,7 +91,6 @@ export default function Video({ src }: VideoProps) {
 
   // 监听视频加载
   useEffect(() => {
-    if (!avCvs.current) return
     const addFakeVideo = async () => {
       setLoading(true)
       setTimeout(async () => {
