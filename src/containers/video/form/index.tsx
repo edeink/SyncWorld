@@ -1,7 +1,7 @@
 import {
   Row,
   Col,
-  Image,
+  Image as AntdImage,
   Button,
   Space,
   Modal,
@@ -81,7 +81,7 @@ const Form = (props: FormProps) => {
   const [step, setStep] = useState<ProgressStep>(ProgressStep.BeforeStart)
   const [outputSrc, setOutputSrc] = useState('')
   const [outputLoading, setOutputLoading] = useState(false)
-  const [cameraControl, setCameraControl] = useState(false)
+  const [cameraControl, setCameraControl] = useState(true)
   const [cameraControlValue, setCameraControlValue] = useState()
   const [percent, setPercent] = useState(0)
 
@@ -95,10 +95,23 @@ const Form = (props: FormProps) => {
     }
     setOutputSrc(url)
     setOutputLoading(true)
-    setTimeout(() => {
-      setOutputSrc(outputAssets[index].src)
-      setOutputLoading(false)
-    }, 500)
+    const image = new Image()
+    const realSrc = outputAssets[index].src
+    const time = Date.now()
+    image.onload = () => {
+      const duration = Date.now() - time
+      // 假装需要500毫秒生成
+      if (duration) {
+        setTimeout(() => {
+          setOutputSrc(realSrc)
+          setOutputLoading(false)
+        }, 500 - duration)
+      } else {
+        setOutputSrc(realSrc)
+        setOutputLoading(false)
+      }
+    }
+    image.src = realSrc
   }
 
   const toggleCameraControl = () => {
@@ -151,7 +164,7 @@ const Form = (props: FormProps) => {
               </Col>
               <Row gutter={4} justify="space-around" align="middle">
                 <Col span={8}>
-                  <Image
+                  <AntdImage
                     src={cutoutPng}
                     fallback={fallbackData}
                     className={styles.imageSelect}
@@ -159,7 +172,7 @@ const Form = (props: FormProps) => {
                   />
                 </Col>
                 <Col span={8}>
-                  <Image
+                  <AntdImage
                     src={maskPng}
                     fallback={fallbackData}
                     className={styles.imageSelect}
@@ -209,7 +222,7 @@ const Form = (props: FormProps) => {
                 </Col>
                 {outputSrc && (
                   <Col>
-                    <Image
+                    <AntdImage
                       style={outputLoading ? { filter: 'blur(10px)' } : {}}
                       src={outputSrc}
                       fallback={fallbackData}
@@ -229,7 +242,7 @@ const Form = (props: FormProps) => {
               <Col span={4}>
                 <Switch
                   disabled={!outputSrc}
-                  defaultChecked={false}
+                  defaultChecked={true}
                   onChange={toggleCameraControl}
                 />
               </Col>
@@ -240,6 +253,7 @@ const Form = (props: FormProps) => {
                     <label>预置视角</label>
                     <Radio.Group
                       value={cameraControlValue}
+                      className={styles.radioGroup}
                       onChange={(e) =>
                         handleCameraControlChange(e.target.value)
                       }

@@ -59,7 +59,7 @@ const App = () => {
         className={styles.navBar}
         style={{ display: 'flex', alignItems: 'center' }}
       >
-        <img src={Logo} alt="logo" style={{ width: '40px', height: '40px' }} />
+        <img src={Logo} alt="logo" style={{ width: '50px', height: '50px' }} />
       </Header>
       <Layout>
         <Sider

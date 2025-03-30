@@ -27,7 +27,7 @@ export async function createFileWriter(extName = 'mp4') {
 
 export type TLActionWithName = TimelineAction & {
   name: string
-  thumbnails: Tthumbnail[]
+  thumbnails: string[]
 }
 
 export type Tthumbnail = {
@@ -127,9 +127,10 @@ export default function Video({ src }: VideoProps) {
     const clip = spr.getClip()
     if (clip instanceof MP4Clip) {
       // 根据 scale 动态调整 step
-      return await clip.thumbnails(100, {
+      const res = await clip.thumbnails(100, {
         step: (3.2e6 /** 四秒 */ * scale) / defaultScale,
       })
+      return res.map((item) => URL.createObjectURL(item.img))
     }
     return []
   }

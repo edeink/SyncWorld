@@ -44,6 +44,34 @@
       color: @inputPlaceColor;
     }
   }
+
+  .radioGroup {
+    background-color: @bgColor;
+    border-radius: 4px;
+    padding: 10px;
+    :global {
+      .ant-radio-button-wrapper {
+        background-color: @bgColor;
+        border: 1px solid @splitColor;
+        color: @textColor;
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease;
+
+        &::before {
+          background-color: @splitColor;
+        }
+
+        &:hover {
+          background-color: @activeBgColor;
+        }
+
+        &-checked {
+          background-color: @activeBgColor;
+        }
+      }
+    }
+  }
 }
 
 .formFooter {

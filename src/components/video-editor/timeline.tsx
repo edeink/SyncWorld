@@ -129,9 +129,9 @@ export const TimelineEditor = ({
                     return (
                       <div
                         className={styles.thumbnail}
-                        key={item.ts}
+                        key={item}
                         style={{
-                          backgroundImage: `url(${URL.createObjectURL(item.img)})`,
+                          backgroundImage: `url(${item})`,
                         }}
                       />
                     )

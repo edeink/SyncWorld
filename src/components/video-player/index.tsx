@@ -84,7 +84,13 @@ const VideoPlayer: React.FC = () => {
           />
         </Col>
         <Col span={20}>
-          <video key={currentVideo} ref={videoRef} width={328} controls={false}>
+          <video
+            key={currentVideo}
+            ref={videoRef}
+            width={328}
+            height={220}
+            controls={false}
+          >
             <source src={currentVideo} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
