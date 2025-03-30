@@ -16,15 +16,7 @@ import styles from './index.module.less'
 import { TLActionWithName } from '.'
 import classNames from 'classnames'
 
-export const TimelineEditor = ({
-  timelineData: tlData,
-  onPreviewTime,
-  onOffsetChange,
-  onDurationChange,
-  onDeleteAction,
-  timelineState,
-  onSplitAction,
-}: {
+interface ITimelineEditorProps {
   timelineData: TimelineRow[]
   timelineState: React.MutableRefObject<TimelineState | undefined>
   onPreviewTime: (time: number) => void
@@ -36,8 +28,22 @@ export const TimelineEditor = ({
   }) => void
   onDeleteAction: (action: TimelineAction) => void
   onSplitAction: (action: TLActionWithName) => void
-}) => {
-  const [scale, setScale] = useState(10)
+  // 缩放
+  scale: number
+  onScale: (scale: number) => void
+}
+
+export const TimelineEditor = ({
+  timelineData: tlData,
+  onPreviewTime,
+  onOffsetChange,
+  onDurationChange,
+  onDeleteAction,
+  timelineState,
+  onSplitAction,
+  scale,
+  onScale,
+}: ITimelineEditorProps) => {
   const [activeAction, setActiveAction] = useState<TLActionWithName | null>(
     null
   )
@@ -48,14 +54,14 @@ export const TimelineEditor = ({
         <Button
           type="text"
           icon={<ZoomOutOutlined className={styles.videoIcon} />}
-          onClick={() => setScale(scale + 1)}
+          onClick={() => onScale(scale + 1)}
         />
       </Tooltip>
       <Tooltip title="缩放">
         <Button
           type="text"
           icon={<ZoomInOutlined className={styles.videoIcon} />}
-          onClick={() => setScale(scale - 1 > 1 ? scale - 1 : 1)}
+          onClick={() => onScale(scale - 1 > 1 ? scale - 1 : 1)}
         />
       </Tooltip>
       <Tooltip title="删除">
@@ -121,10 +127,12 @@ export const TimelineEditor = ({
               {action.thumbnails
                 ? action.thumbnails.map((item) => {
                     return (
-                      <img
+                      <div
                         className={styles.thumbnail}
-                        src={URL.createObjectURL(item.img)}
                         key={item.ts}
+                        style={{
+                          backgroundImage: `url(${URL.createObjectURL(item.img)})`,
+                        }}
                       />
                     )
                   })

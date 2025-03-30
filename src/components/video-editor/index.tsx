@@ -50,6 +50,8 @@ interface VideoProps {
   src: string
 }
 
+const defaultScale = 10
+
 export default function Video({ src }: VideoProps) {
   const avCvs = useRef<AVCanvas | null>(null)
   const tlState = useRef<TimelineState | undefined>(undefined)
@@ -57,6 +59,7 @@ export default function Video({ src }: VideoProps) {
   const [loading, setLoading] = useState(false)
   const [refContainer, setRefContainer] = useState<HTMLDivElement | null>(null)
   const [cvsWrapEl, setCvsWrapEl] = useState<HTMLDivElement | null>(null)
+  const [scale, setScale] = useState(defaultScale)
   const [tlData, setTLData] = useState<TimelineRow[]>([
     { id: '1-video', actions: [] },
     { id: '2-audio', actions: [] },
@@ -101,7 +104,7 @@ export default function Video({ src }: VideoProps) {
         await avCvs.current?.addSprite(spr)
         addSpriteToTrack('1-video', spr, '视频')
         setLoading(false)
-      }, 1000)
+      }, 500)
     }
     eventBus.on(EVENTS.ADD_FAKE_VIDEO, addFakeVideo)
     return () => {
@@ -109,7 +112,29 @@ export default function Video({ src }: VideoProps) {
     }
   }, [avCvs, src])
 
-  // 添加 Sprite 到轨道
+  // 本地导入
+  const handleLocalUpload = async () => {
+    const stream = (await loadFile({ 'video/*': ['.mp4', '.mov'] })).stream()
+    const spr = new VisibleSprite(
+      new MP4Clip(stream, { __unsafe_hardwareAcceleration__ })
+    )
+    await avCvs.current?.addSprite(spr)
+    addSpriteToTrack('1-video', spr, '视频')
+  }
+
+  // 公共方法：生成缩略图
+  const generateThumbnails = async (spr: VisibleSprite, scale: number) => {
+    const clip = spr.getClip()
+    if (clip instanceof MP4Clip) {
+      // 根据 scale 动态调整 step
+      return await clip.thumbnails(100, {
+        step: (3.2e6 /** 四秒 */ * scale) / defaultScale,
+      })
+    }
+    return []
+  }
+
+  // 更新添加 Sprite 到轨道的方法，使用最新的 scale 更新 thumbnails
   const addSpriteToTrack = async (
     trackId: string,
     spr: VisibleSprite,
@@ -123,11 +148,7 @@ export default function Video({ src }: VideoProps) {
     if (spr.time.duration === Infinity) spr.time.duration = 10e6
 
     // 获取图像集合（例如从视频帧中提取图像）
-    let thumbnails: Tthumbnail[] = []
-    const clip = spr.getClip()
-    if (clip instanceof MP4Clip) {
-      thumbnails = await clip.thumbnails() // 假设有方法来提取视频帧
-    }
+    const thumbnails = await generateThumbnails(spr, scale)
 
     const action = {
       id: Math.random().toString(),
@@ -146,6 +167,27 @@ export default function Video({ src }: VideoProps) {
 
     return action
   }
+
+  // 当 scale 发生变化时，遍历 tlData，重新生成缩略图
+  useEffect(() => {
+    Promise.all(
+      tlData.map(async (track) => {
+        const updatedActions = await Promise.all(
+          track.actions.map(async (action) => {
+            const spr = actionSpriteMap.get(action)
+            if (spr) {
+              ;(action as TLActionWithName).thumbnails =
+                await generateThumbnails(spr, scale)
+            }
+            return action
+          })
+        )
+        return { ...track, actions: updatedActions }
+      })
+    ).then((updatedData) => {
+      setTLData(updatedData)
+    })
+  }, [scale]) // 依赖 scale 和 tlData，确保每次 scale 变化时更新
 
   // 播放暂停
   const handlePlayPause = () => {
@@ -170,16 +212,7 @@ export default function Video({ src }: VideoProps) {
         <Button
           type="text"
           icon={<UploadOutlined className={styles.videoIcon} />}
-          onClick={async () => {
-            const stream = (
-              await loadFile({ 'video/*': ['.mp4', '.mov'] })
-            ).stream()
-            const spr = new VisibleSprite(
-              new MP4Clip(stream, { __unsafe_hardwareAcceleration__ })
-            )
-            await avCvs.current?.addSprite(spr)
-            addSpriteToTrack('1-video', spr, '视频')
-          }}
+          onClick={handleLocalUpload}
         />
       </Tooltip>
       <Tooltip title="播放">
@@ -203,6 +236,8 @@ export default function Video({ src }: VideoProps) {
         />
       </Tooltip>
       <TimelineEditor
+        scale={scale}
+        onScale={setScale}
         onSplitAction={(action) => {
           const spr = actionSpriteMap.get(action)
           if (spr) {

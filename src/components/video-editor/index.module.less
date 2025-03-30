@@ -14,13 +14,22 @@
     color: @textColor;
   }
   .splitAction {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
     border: 1px solid transparent;
+    overflow: hidden;
+    user-select: none;
+    white-space: nowrap;
     &.actionActive {
       border: 1px solid @activeBorderColor;
     }
 
     .thumbnail {
-      width: 100%;
+      display: inline-block;
+      width: 50px;
+      height: 100%;
+      background-size: cover;
     }
   }
 }

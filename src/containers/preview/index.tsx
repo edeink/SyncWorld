@@ -31,7 +31,7 @@ const PreviewContainer = () => {
         ...Array.from({ length: 10 }, getRandomImage),
       ])
       setLoading(false)
-    }, 1500)
+    }, 500)
   }, [loading])
 
   // 监听滚动，触发懒加载

@@ -98,7 +98,7 @@ const Form = (props: FormProps) => {
     setTimeout(() => {
       setOutputSrc(outputAssets[index].src)
       setOutputLoading(false)
-    }, 1000)
+    }, 500)
   }
 
   const toggleCameraControl = () => {
@@ -121,7 +121,7 @@ const Form = (props: FormProps) => {
     if (step === ProgressStep.AfterUpload) {
       setTimeout(() => {
         if (percent < 100) {
-          setPercent(percent + 1)
+          setPercent(percent + 4)
         }
       }, 16)
     }
